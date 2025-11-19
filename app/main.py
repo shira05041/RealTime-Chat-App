@@ -134,7 +134,7 @@ async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
                     type="message",
                     user=username,
                     content=message_request.content,
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                     reactions=ReactionData()
                 )    
 
