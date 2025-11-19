@@ -16,7 +16,7 @@ class Message(BaseModel):
     reactions: ReactionData = ReactionData()
     online: Optional[List[str]] = None #for join/leave message
 
-class MessageBrodcast(BaseModel):
+class MessageBroadcast(BaseModel):
     """Model for message sent to websocket clients"""
     type: Literal["message", "join", "leave", "reaction", "add_reaction", "remove_reaction"]
     user: str

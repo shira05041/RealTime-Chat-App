@@ -7,7 +7,7 @@ from starlette.requests import Request
 from datetime import datetime
 import uvicorn, json, uuid
 from pydantic import ValidationError
-from .schemas import Message, MessageBrodcast, MessageRequest, ReactionData, AddReactionRequest, ReactionRequest, RemoveReactionRequest
+from .schemas import Message, MessageBroadcast, ReactionRequest, MessageRequest, ReactionData, AddReactionRequest, RemoveReactionRequest
 
 app = FastAPI()
 
@@ -31,7 +31,7 @@ class ConnectionManager:
             self.rooms[room].remove(websocket)
             if room in self.users and id(websocket) in self.users[room]:
                 username = self.users[room].pop(id(websocket))
-                await self.broadcast(room, {"type": "leave", "user": username, "onlinr": list(self.users[room].values())})
+                await self.broadcast(room, {"type": "leave", "user": username, "online": list(self.users[room].values())})
             if not self.rooms[room]:
                 del self.rooms[room]    
                 if room in self.users:
@@ -43,7 +43,7 @@ class ConnectionManager:
 
     def get_message(self, room: str, message_id : str) -> Optional[Message]:
         """Get a specific message by ID"""
-        return self.message.get(message_id)
+        return self.message.get(room, {}).get(message_id)
 
     def verify_user_in_room(self, room: str, username: str) -> bool:
         """Verify that a user is curently connected to the room"""
@@ -58,7 +58,7 @@ class ConnectionManager:
             return False
 
         if emoji not in message.reactions.emoji:
-            message.reactions.emjoi[emoji] = []
+            message.reactions.emoji[emoji] = []
 
         if username not in message.reactions.emoji[emoji]:
             message.reactions.emoji[emoji].append(username)   
@@ -71,7 +71,7 @@ class ConnectionManager:
         if not message:
             return False
         
-        if emoji in message.reactions.emoji and username in message.reaction.emoji[emoji]:
+        if emoji in message.reactions.emoji and username in message.reactions.emoji[emoji]:
             message.reactions.emoji[emoji].remove(username)
             #remove emoji key if no users have this reaction
             if not message.reactions.emoji[emoji]:
@@ -79,7 +79,7 @@ class ConnectionManager:
             return True
         return False
 
-    async def broadcast(self, room: str, message: Union[dict, MessageBrodcast]):
+    async def broadcast(self, room: str, message: Union[dict, MessageBroadcast]):
         """Broadcast a message to all clients in a room"""
         if room in self.rooms:
             #convert to dict if it's a Pydantic model
@@ -110,7 +110,7 @@ manager = ConnectionManager()
 
 @app.get("/")
 async def get_index(request: Request):
-    return templates.TemplateResponse("index.html", {"requst": request})
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.websocket("/ws/{room}/{username}")
 async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
@@ -141,7 +141,7 @@ async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
                 manager.store_message(room, message)
 
                 #broadcast message to all clients
-                broadcast_message = MessageBrodcast(
+                broadcast_message = MessageBroadcast(
                     type="message",
                     user=username,
                     content=message_request.content,
@@ -175,7 +175,7 @@ async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
                         #get users for this specific emoji
                         users_for_emoji = updated_message.reactions.emoji.get(add_reaction_request.emoji, [])
 
-                        reaction_update =  MessageBrodcast(
+                        reaction_update =  MessageBroadcast(
                             type="reaction_update",
                             user=username,
                             message_id=add_reaction_request.message_id,
@@ -208,7 +208,7 @@ async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
                         #get users for this specific emoji(empty list if remved comletely)
                         users_for_emoji = updated_message.reactions.emoji.get(remove_reaction_request.emoji, [])
 
-                        reaction_update =  MessageBrodcast(
+                        reaction_update =  MessageBroadcast(
                             type="reaction_update",
                             user=username,
                             message_id=remove_reaction_request.message_id,
@@ -243,9 +243,9 @@ async def websocket_endpoint(websocket: WebSocket, room: str, username: str):
                     updated_message = manager.get_message(room, reaction_request.message_id)
                     if updated_message:
                         #get users for this specific emoji
-                        users_for_emoji = updated_message.reactions.emoji.get(remove_reaction_request.emoji, [])
+                        users_for_emoji = updated_message.reactions.emoji.get(reaction_request.emoji, [])
 
-                        reaction_update =  MessageBrodcast(
+                        reaction_update =  MessageBroadcast(
                             type="reaction_update",
                             user=username,
                             message_id=reaction_request.message_id,

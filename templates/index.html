@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Real-time Chat</title>
+        <link rel="stylesheet" href="/static/styles.css">
+    </head>
+    <body>
+        <!-- Landing Panel (visible initially, hidden once connected) -->
+        <div id="landing-panel" class="landing-panel">
+            <div class="landing-content">
+                <h1>Join Chat Room</h1>
+                <from id="join-form" class="join-form">
+                    <div class="form-group">
+                        <label for="room-name">Room Name:</label>
+                        <input type="text" id="username" name="room-name" placeholder="Enter room name" required>
+                    </div>
+                    <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <button type="submit" id="join-btn">Join Room</button>
+                </from>
+            </div>
+        </div>
+
+        <!-- Main Chat Layout (hidden initially, shown once connected) -->
+         <div id="chat-container" class="chat-container" style="display: none;">
+        <!-- Header Section -->
+        <header id="chat-header" class="chat-header">
+            <div class="header-content">
+                <h2 id="current-room" class="current-room">Room: </h2>
+                <div id="connection-status" class="connection-status">
+                    <span class="status-indicator offline"></span>
+                    <span id="status-text">Disconnected</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Sidebar - Online Users -->
+            <aside id="users-sidebar" class="users-sidebar">
+                <h3>Online Users</h3>
+                <ul id="users-list" class="users-list">
+                    <!-- Users will be populated dynamically -->
+                </ul>
+            </aside>
+
+            <!-- Central Message Area -->
+            <main id="messages-container" class="messages-container">
+                <div id="messages-pane" class="messages-pane">
+                    <!-- Messages will be populated dynamically -->
+                </div>
+            </main>
+        </div>
+
+        <!-- Fixed Footer with Message Input -->
+        <footer id="message-footer" class="message-footer">
+            <form id="message-form" class="message-form">
+                <div class="input-container">
+                    <textarea 
+                        id="message-input" 
+                        class="message-input" 
+                        placeholder="Type your message..." 
+                        rows="1"
+                        maxlength="500"
+                        required></textarea>
+                    <button type="submit" id="send-btn" class="send-btn">Send</button>
+                </div>
+            </form>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/app.js"></script>     
+</body>
+</html>
