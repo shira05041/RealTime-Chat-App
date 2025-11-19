@@ -46,7 +46,7 @@ class RemoveReactionRequest(BaseModel):
     message_id: str
     emoji: str
 
-class MessageREquest(BaseModel):
+class MessageRequest(BaseModel):
     """Model for incoming message requests"""  
     type: Literal["message"]  
     content: str
